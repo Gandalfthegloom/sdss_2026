@@ -1,4 +1,5 @@
 import pandas as pd
+from Preprocessing import extractCityStateMetropolitan, joinMedianIncome
 
 def process_airline_data():
     # Read Airline Ticket Dataset
@@ -36,9 +37,14 @@ def process_airline_data():
     nom_price = ["fare", "fare_lg", "fare_low"]
     for col in nom_price:
         df2[f"{col}_real"] = df2[col] * (100 / df2["cpi_adj"])
+        
+    df2 = extractCityStateMetropolitan(df2)
+    df2 = joinMedianIncome(df2, "state_1")
+    df2 = joinMedianIncome(df2, "state_2")
 
     # Save the resulting dataset to CSV
     df2.to_csv("Data/Interim/adjusted_airline_tickets.csv", index=False)
 
 if __name__ == "__main__":
     process_airline_data()
+    
