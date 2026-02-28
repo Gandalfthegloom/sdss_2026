@@ -40,6 +40,7 @@ def process_airline_data():
         
     df2 = extractCityStateMetropolitan(df2)
     df2 = joinMedianIncome(df2, "state_1")
+    df2 = joinMedianIncome(df2, "state_2")
 
     # Save the resulting dataset to CSV
     df2.to_csv("Data/Interim/adjusted_airline_tickets.csv", index=False)
