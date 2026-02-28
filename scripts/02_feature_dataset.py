@@ -11,7 +11,7 @@ RAW_CSV_PATH = "Data/Interim/adjusted_airline_tickets.csv"
 OUTPUT_CSV_PATH = "Data/Processed/model_ready_airline_fares.csv"
 TARGET_COL = "fare_real"
 RANDOM_STATE = 42
-TEST_SIZE = 0.2
+TEST_SIZE = 0.3
 
 
 KEEP_COLS = [
@@ -132,21 +132,28 @@ def get_train_test_split(
     random_state: int = RANDOM_STATE,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
-    Return X_train, X_test, y_train, y_test from the filtered dataset.
+    Return X_train, X_test, x_val, y_train, y_test, y_val from the filtered dataset.
     """
     model_df = build_filtered_dataset(csv_path)
 
-    X = model_df.drop(columns=[TARGET_COL])
+    x = model_df.drop(columns=[TARGET_COL])
     y = model_df[TARGET_COL]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
+    x_train, x_test, y_train, y_test = train_test_split(
+        x,
         y,
         test_size=test_size,
         random_state=random_state,
     )
+    
+    x_val, x_train, y_val, y_train = train_test_split(
+        x_train,
+        y_train,
+        0.5,
+        random_state=random_state,
+    )
 
-    return X_train, X_test, y_train, y_test
+    return x_train, x_test, x_val, y_train, y_test, y_val
 
 
 if __name__ == "__main__":
