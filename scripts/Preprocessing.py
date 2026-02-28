@@ -15,14 +15,17 @@ def joinMedianIncome(origin, state_column_origin):
     if not median_path.exists():
         getMedianIncome()
 
+    number = state_column_origin[-1]
     median = pd.read_csv("Data/Median_Income.csv")
+
+    median = median.rename(columns={"median_household_income": f"median_income_{number}"})
 
     return origin.merge(
         median,
         left_on=[state_column_origin, "Year"],
         right_on=["STATE", "year"],
         how="left"
-    )
+    ).drop(columns=["STATE", "year"])
 
 
 def extractCityStateMetropolitan(df):
