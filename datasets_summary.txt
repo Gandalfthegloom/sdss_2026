@@ -1,0 +1,63 @@
+--- Dataset 3: Public Services Dataset ---
+Size: 100337 rows, 11 columns
+
+Column Summaries:
+- Column: 'OCCUPANCY_DATE' (Type: datetime64[us])
+  -> Datetime Summary: Ranges from 2024-01-01 00:00:00 to 2025-12-31 00:00:00
+- Column: 'LOCATION_POSTAL_CODE' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'NAN': 4512 occurrences
+      'M5A2N2': 3761 occurrences
+      'M3L1A5': 3010 occurrences
+      'M5V1A3': 2924 occurrences
+      'M2M3T3': 2274 occurrences
+      'M5B2P3': 2241 occurrences
+      'M5A1T3': 1981 occurrences
+      'M2J4R1': 1663 occurrences
+      'M5V3W3': 1582 occurrences
+      'M1L4A1': 1514 occurrences
+      ... and 101 more unique categories.
+- Column: 'SECTOR' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'Mixed Adult': 28780 occurrences
+      'Men': 25994 occurrences
+      'Women': 17784 occurrences
+      'Youth': 17386 occurrences
+      'Families': 10393 occurrences
+- Column: 'OVERNIGHT_SERVICE_TYPE' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'Shelter': 65494 occurrences
+      'Motel/Hotel Shelter': 20243 occurrences
+      '24-Hour Respite Site': 6431 occurrences
+      'Top Bunk Contingency Space': 2672 occurrences
+      'Alternative Space Protocol': 2271 occurrences
+      '24-Hour Women's Drop-in': 1462 occurrences
+      'Warming Centre': 1209 occurrences
+      'Isolation/Recovery Site': 489 occurrences
+      'Surge site': 66 occurrences
+- Column: 'PROGRAM_MODEL' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'Emergency': 80037 occurrences
+      'Transitional': 20296 occurrences
+- Column: 'PROGRAM_AREA' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'Base Shelter and Overnight Services System': 64008 occurrences
+      'Temporary Programs': 15926 occurrences
+      'Temporary Refugee Response': 9534 occurrences
+      'Base Program - Refugee': 5686 occurrences
+      'Winter Programs': 5183 occurrences
+- Column: 'CAPACITY_TYPE' (Type: str)
+  -> Categorical Summary (Top 10 Values):
+      'Bed Based Capacity': 73528 occurrences
+      'Room Based Capacity': 26809 occurrences
+- Column: 'ACTUAL_CAPACITY' (Type: int64)
+  -> Numerical Summary: Mean = 53.15, Median = 39.00, Max = 329.00
+- Column: 'OCCUPIED_CAPACITY' (Type: int64)
+  -> Numerical Summary: Mean = 52.45, Median = 38.00, Max = 329.00
+- Column: 'UNAVAILABLE_CAPACITY' (Type: int64)
+  -> Numerical Summary: Mean = 2.24, Median = 0.00, Max = 171.00
+- Column: 'OCCUPANCY_RATE' (Type: float64)
+  -> Numerical Summary: Mean = 0.97, Median = 1.00, Max = 1.02
+
+==================================================
+
