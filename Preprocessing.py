@@ -1,17 +1,26 @@
-def joinMedianIncome(origin, median, state_column_origin, state_column_median):
+import pandas as pd
+import pathlib as Path
+from getMedianIncome import getMedianIncome
+
+
+def joinMedianIncome(origin, state_column_origin):
     """
     Merge median dataset into origin dataset
     :param origin: Original/Target Dataset
-    :param median: Median Income Dataset
     :param state_column_origin: Column Name for State in Original Dataset
-    :param state_column_median: Column Name for State in Median Dataset
     :return: New Dataset
     """
+    "state_1"
+    median_path = Path("Data/Median_Income.csv")
+    if not median_path.exists():
+        getMedianIncome()
+
+    median = pd.read_csv("Data/Median_Income.csv")
 
     return origin.merge(
         median,
         left_on=[state_column_origin, "Year"],
-        right_on=[state_column_median, "year"],
+        right_on=["STATE", "year"],
         how="left"
     )
 
