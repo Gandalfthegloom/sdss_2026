@@ -72,19 +72,26 @@ NUMERIC_COLS = [
 ]
 
 
-def build_filtered_dataset(csv_path: str | Path = RAW_CSV_PATH) -> pd.DataFrame:
+def build_filtered_dataset(
+        string_cols,
+        numeric_cols,
+        target_col,
+        csv_path: str | Path = RAW_CSV_PATH
+) -> pd.DataFrame:
     """
     Load, filter, and clean the airline fare dataset.
 
     Returns a model-ready dataframe that still contains the target column.
     """
     df = pd.read_csv(csv_path)
+    keep_cols = numeric_cols.extend(string_cols)
+    keep_cols = keep_cols.append(target_col)
 
-    missing_cols = [col for col in KEEP_COLS if col not in df.columns]
+    missing_cols = [col for col in keep_cols if col not in df.columns]
     if missing_cols:
         raise ValueError(f"Missing required columns: {missing_cols}")
 
-    model_df = df[KEEP_COLS].copy()
+    model_df = df[keep_cols].copy()
 
     # Create aggregate feature requested earlier
     model_df["TotalFaredTotal"] = (
@@ -93,16 +100,16 @@ def build_filtered_dataset(csv_path: str | Path = RAW_CSV_PATH) -> pd.DataFrame:
     )
 
     # Standardize text columns
-    for col in STRING_COLS:
+    for col in string_cols:
         model_df[col] = model_df[col].astype("string").str.strip()
         model_df[col] = model_df[col].replace({"": pd.NA, "nan": pd.NA, "None": pd.NA})
 
     # Convert numerics
-    for col in NUMERIC_COLS + ["TotalFaredTotal"]:
+    for col in numeric_cols + ["TotalFaredTotal"]:
         model_df[col] = pd.to_numeric(model_df[col], errors="coerce")
 
     # Basic row filtering
-    model_df = model_df.dropna(subset=[TARGET_COL])
+    model_df = model_df.dropna(subset=[target_col])
     model_df = model_df.drop_duplicates()
     model_df = model_df.loc[
         (model_df["fare_real"] > 0)
@@ -111,11 +118,11 @@ def build_filtered_dataset(csv_path: str | Path = RAW_CSV_PATH) -> pd.DataFrame:
     ].copy()
 
     # Impute numeric columns with median
-    for col in NUMERIC_COLS + ["TotalFaredTotal"]:
+    for col in numeric_cols + ["TotalFaredTotal"]:
         model_df[col] = model_df[col].fillna(model_df[col].median())
 
     # Impute categorical columns with mode
-    for col in STRING_COLS:
+    for col in string_cols:
         mode = model_df[col].mode(dropna=True)
         fill_value = mode.iloc[0] if not mode.empty else "Unknown"
         model_df[col] = model_df[col].fillna(fill_value)
@@ -130,14 +137,17 @@ def get_train_test_val_split(
     csv_path: str | Path = RAW_CSV_PATH,
     test_size: float = TEST_SIZE,
     random_state: int = RANDOM_STATE,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    string_cols: list = STRING_COLS,
+    numeric_cols: list = NUMERIC_COLS,
+    target_col: str = TARGET_COL,
+):
     """
     Return X_train, X_test, x_val, y_train, y_test, y_val from the filtered dataset.
     """
-    model_df = build_filtered_dataset(csv_path)
+    model_df = build_filtered_dataset(string_cols, numeric_cols, target_col, csv_path)
 
-    X = model_df.drop(columns=[TARGET_COL])
-    y = model_df[TARGET_COL]
+    X = model_df.drop(columns=[target_col])
+    y = model_df[target_col]
 
     X_train, X_temp, y_train, y_temp = train_test_split(
         X,
