@@ -42,7 +42,7 @@ if __name__ == "__main__":
         # "city_2",
         # "state_1",
         # "state_2",
-        "carrier_low",
+        # "carrier_low",
         # "metro_1",
         # "metro_2",
     ]
@@ -67,10 +67,11 @@ if __name__ == "__main__":
 
     X_train, X_test, X_val, y_train, y_test, y_val = get_train_test_val_split(string_cols=STRING_COLS, numeric_cols=NUMERIC_COLS)
 
+    # Uncomment if variable is used
     cat_cols = [
         # "city_1", "city_2", 
         # "state_1", "state_2", 
-                "carrier_low", 
+        # "carrier_low", 
         # "metro_1", "metro_2"
         ]
 

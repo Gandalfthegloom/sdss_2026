@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Flight Fare Predictor", layout="wide")
 st.title("✈️ Smart Flight Fare Predictor")
 
-# --- Helper Function for SHAP ---
+# --- Helper Function for SHAP if using XGBOOST---
 def make_shap_friendly(df, cat_cols):
     df2 = df.copy()
     for col in cat_cols:
@@ -27,8 +27,8 @@ def make_shap_friendly(df, cat_cols):
 # 1. Load Model and Lookup Data
 @st.cache_resource
 def load_model():
-    model = joblib.load("artifacts/models/xgboost_fare_model.pkl")
-    metadata = joblib.load("artifacts/models/model_metadata.pkl")
+    model = joblib.load("artifacts/models/lgbm_fare_model.pkl") # use lgbm
+    metadata = joblib.load("artifacts/models/lgbm_model_metadata.pkl")
     return model, metadata
 
 @st.cache_data
@@ -153,13 +153,20 @@ if st.button("Predict Fare & Show Explanation", type="primary"):
     
     st.markdown("### Why is this route priced this way?")
     st.write("This waterfall chart shows how the route's current structural features (like monopolies or hub premiums) push the expected fare up or down from the national baseline.")
+    st.write("Some features that signify this include:")
+    st.write("- Market share of dominant flight carrier on a route")
+    st.write("- Pricing premiums applied on ticket prices on origin and destination")
+    st.write("- How much are low cost carriers present and used in origin and destination")
     
-    # Create a SHAP-friendly copy of the ACTUAL row (not the fair row)
+    # Create a SHAP-friendly copy of the ACTUAL row (not the fair row) (UNCOMMENT IF USING XHBOOST)
     # We want SHAP to explain the actual market conditions so the user sees the penalties!
-    shap_input = make_shap_friendly(input_features, cat_cols)
+    # shap_input = make_shap_friendly(input_features, cat_cols)
+    # explainer = shap.TreeExplainer(model)
+    # shap_explanation = explainer(shap_input)
     
+    # Like the above but for LGBM
     explainer = shap.TreeExplainer(model)
-    shap_explanation = explainer(shap_input)
+    shap_explanation = explainer(input_features)
     
     # Group Anti-Competitive Features and Rename for UI ---
     import copy
@@ -181,7 +188,10 @@ if st.button("Predict Fare & Show Explanation", type="primary"):
         'lf_ms': 'Budget Airline Market Share',
         'carrier_low': 'Lowest Fare Carrier',
         'TotalFaredTotal': 'Total Market Traffic',
-        'Quarter': 'Seasonality (Quarter)'
+        'Quarter': 'Seasonality (Quarter)',
+        'TotalFaredPax_city2': 'Total passengers through destination',
+        'TotalFaredPax_city1': 'Total passengers through origin',
+        'median_income_2': 'Median income in state of destination'
     }
     
     new_values = []
@@ -203,7 +213,7 @@ if st.button("Predict Fare & Show Explanation", type="primary"):
     # Append our new grouped feature to the list
     new_values.append(grouped_penalty_value)
     new_data.append("") # Leave the raw data label blank for grouped categories
-    new_names.append("🚨 Anti-Competitive Penalties (Monopoly/Hub)")
+    new_names.append("Anti-Competitive Penalties (Monopoly/Hub)")
     
     # Rebuild the Explanation object with our clean data
     new_exp = copy.deepcopy(exp)
