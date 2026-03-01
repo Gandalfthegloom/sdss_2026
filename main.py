@@ -1,12 +1,11 @@
 from scripts.s02_feature_dataset import get_train_test_val_split
-from src.XGBoost import getXGBoost
 import pandas as pd
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
 import os
-
 import joblib
+import lightgbm as lgb  # Swapped to LightGBM
 
 from sklearn.metrics import (
     mean_squared_error,
@@ -16,10 +15,7 @@ from sklearn.metrics import (
     explained_variance_score
 )
 
-
-
 def make_shap_friendly(df, cat_cols):
-    
     df2 = df.copy()
 
     for col in cat_cols:
@@ -29,7 +25,7 @@ def make_shap_friendly(df, cat_cols):
         # Convert categories to integer codes for SHAP
         df2[col] = df2[col].cat.codes
 
-        # SHAP/XGBoost can dislike -1 for missing categories; make them NaN instead
+        # SHAP/LightGBM can dislike -1 for missing categories; make them NaN instead
         df2[col] = df2[col].replace(-1, np.nan)
 
     # Force any lingering object columns to numeric if possible
@@ -42,13 +38,13 @@ def make_shap_friendly(df, cat_cols):
 if __name__ == "__main__":
     
     STRING_COLS = [
-        "city_1",
-        "city_2",
-        "state_1",
-        "state_2",
+        # "city_1",
+        # "city_2",
+        # "state_1",
+        # "state_2",
         "carrier_low",
-        "metro_1",
-        "metro_2",
+        # "metro_1",
+        # "metro_2",
     ]
 
     NUMERIC_COLS = [
@@ -56,11 +52,9 @@ if __name__ == "__main__":
         "quarter",
         "nsmiles",
         "passengers",
-        "fare_real",
+        "fare_real", 
         "large_ms",
-        # "fare_lg_real",
         "lf_ms",
-        # "fare_low_real",
         "TotalFaredPax_city1",
         "TotalPerLFMkts_city1",
         "TotalPerPrem_city1",
@@ -73,14 +67,33 @@ if __name__ == "__main__":
 
     X_train, X_test, X_val, y_train, y_test, y_val = get_train_test_val_split(string_cols=STRING_COLS, numeric_cols=NUMERIC_COLS)
 
-    cat_cols = ["city_1", "city_2", "state_1", "state_2", "carrier_low", "metro_1", "metro_2"]
+    cat_cols = [
+        # "city_1", "city_2", 
+        # "state_1", "state_2", 
+                "carrier_low", 
+        # "metro_1", "metro_2"
+        ]
 
     for col in cat_cols:
         X_train[col] = X_train[col].astype("category")
         X_val[col] = X_val[col].astype("category")
         X_test[col] = X_test[col].astype("category")
 
-    model = getXGBoost(X_train, X_val, y_train, y_val)
+    # Initialize and train LightGBM Regressor
+    print("Training LightGBM Model...")
+    model = lgb.LGBMRegressor(
+        n_estimators=500,
+        learning_rate=0.05,
+        random_state=42
+    )
+    
+    # LightGBM handles validation natively through fit
+    model.fit(
+        X_train, 
+        y_train,
+        eval_set=[(X_val, y_val)],
+        callbacks=[lgb.early_stopping(stopping_rounds=50)]
+    )
 
     y_pred = model.predict(X_test)
 
@@ -105,35 +118,29 @@ if __name__ == "__main__":
     results["fare_gap"] = results["actual_fare"] - results["predicted_fare"]
 
     os.makedirs("artifacts/shap", exist_ok=True)
-    # Sample rows
-X_shap_raw = X_test.sample(min(300, len(X_test)), random_state=42).copy()
+    
+    # Sample rows for SHAP
+    X_shap_raw = X_test.sample(min(300, len(X_test)), random_state=42).copy()
 
-# SHAP-friendly numeric copies
-X_train_shap = make_shap_friendly(X_train, cat_cols)
-X_shap = make_shap_friendly(X_shap_raw, cat_cols)
+    # LightGBM handles categories natively, so we pass X_shap_raw directly!
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_shap_raw)
 
-# Optional sanity check
-print(X_shap.dtypes)
-print(X_shap.isnull().sum().sort_values(ascending=False).head(10))
+    plt.figure()
+    shap.summary_plot(shap_values, X_shap_raw, show=False)
+    plt.tight_layout()
+    plt.savefig("artifacts/shap/shap_summary_lgbm.png", dpi=200, bbox_inches="tight") 
+    plt.close()
 
-explainer = shap.TreeExplainer(model)
-shap_values = explainer.shap_values(X_shap)
+    print("Saved SHAP summary plot.")
 
-plt.figure()
-shap.summary_plot(shap_values, X_shap, show=False)
-plt.tight_layout()
-plt.savefig("artifacts/shap/shap_summary.png", dpi=200, bbox_inches="tight")
-plt.close()
+    # Save the model with new lgbm filenames
+    os.makedirs("artifacts/models", exist_ok=True)
+    joblib.dump(model, "artifacts/models/lgbm_fare_model.pkl") 
 
-print("Saved SHAP summary plot.")
-
-# Save the model
-os.makedirs("artifacts/models", exist_ok=True)
-joblib.dump(model, "artifacts/models/xgboost_fare_model.pkl")
-
-# Save the expected columns and categories so Streamlit knows the exact format
-model_metadata = {
-    "columns": X_train.columns.tolist(),
-    "categories": {col: X_train[col].cat.categories.tolist() for col in cat_cols}
-}
-joblib.dump(model_metadata, "artifacts/models/model_metadata.pkl")
+    # Save the expected columns and categories so Streamlit knows the exact format
+    model_metadata = {
+        "columns": X_train.columns.tolist(),
+        "categories": {col: X_train[col].cat.categories.tolist() for col in cat_cols}
+    }
+    joblib.dump(model_metadata, "artifacts/models/lgbm_model_metadata.pkl")

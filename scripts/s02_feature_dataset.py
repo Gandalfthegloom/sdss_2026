@@ -106,16 +106,16 @@ def build_filtered_dataset(
     # Optional rename for readability
     model_df = model_df.rename(columns={"quarter": "Quarter"})
 
-    valid_mask = (model_df["Year"] == 2024) & (model_df["Quarter"] >= 3)
-    test_mask = (model_df["Year"] == 2025)
-    train_mask = ~(valid_mask | test_mask)
+    # valid_mask = (model_df["Year"] == 2024) & (model_df["Quarter"] >= 3)
+    # test_mask = (model_df["Year"] == 2025)
+    # train_mask = ~(valid_mask | test_mask)
 
-    model_df_train = model_df.loc[train_mask].reset_index(drop=True)
-    model_df_valid = model_df.loc[valid_mask].reset_index(drop=True)
-    model_df_test = model_df.loc[test_mask].reset_index(drop=True)
+    # model_df_train = model_df.loc[train_mask].reset_index(drop=True)
+    # model_df_valid = model_df.loc[valid_mask].reset_index(drop=True)
+    # model_df_test = model_df.loc[test_mask].reset_index(drop=True)
 
-    return model_df_train, model_df_valid, model_df_test
-
+    # return model_df_train, model_df_valid, model_df_test
+    return model_df
 
 def get_train_test_val_split(
     string_cols: list,
@@ -128,33 +128,34 @@ def get_train_test_val_split(
     """
     Return X_train, X_test, x_val, y_train, y_test, y_val from the filtered dataset.
     """
-    model_df_train, model_df_valid, model_df_test = build_filtered_dataset(string_cols=string_cols, numeric_cols=numeric_cols, target_col=target_col, csv_path=csv_path)
+    # model_df_train, model_df_valid, model_df_test = build_filtered_dataset(string_cols=string_cols, numeric_cols=numeric_cols, target_col=target_col, csv_path=csv_path)
 
-    X_train = model_df_train.drop(columns=[target_col])
-    y_train = model_df_train[target_col]
+    # X_train = model_df_train.drop(columns=[target_col])
+    # y_train = model_df_train[target_col]
 
-    X_val = model_df_valid.drop(columns=[target_col])
-    y_val = model_df_valid[target_col]
+    # X_val = model_df_valid.drop(columns=[target_col])
+    # y_val = model_df_valid[target_col]
 
-    X_test = model_df_test.drop(columns=[target_col])
-    y_test = model_df_test[target_col]
+    # X_test = model_df_test.drop(columns=[target_col])
+    # y_test = model_df_test[target_col]
 
-    # X = model_df.drop(columns=[target_col])
-    # y = model_df[target_col]
-    #
-    # X_train, X_temp, y_train, y_temp = train_test_split(
-    #     X,
-    #     y,
-    #     test_size=test_size,
-    #     random_state=random_state,
-    # )
-    #
-    # X_val, X_test, y_val, y_test = train_test_split(
-    #     X_temp,
-    #     y_temp,
-    #     test_size=0.5,
-    #     random_state=random_state,
-    # )
+    model_df = build_filtered_dataset(string_cols=string_cols, numeric_cols=numeric_cols, target_col=target_col, csv_path=csv_path)
+    X = model_df.drop(columns=[target_col])
+    y = model_df[target_col]
+    
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X,
+        y,
+        test_size=test_size,
+        random_state=random_state,
+    )
+    
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp,
+        y_temp,
+        test_size=0.5,
+        random_state=random_state,
+    )
 
     return X_train, X_test, X_val, y_train, y_test, y_val
 
