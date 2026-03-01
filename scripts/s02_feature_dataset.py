@@ -84,8 +84,11 @@ def build_filtered_dataset(
     Returns a model-ready dataframe that still contains the target column.
     """
     df = pd.read_csv(csv_path)
-    keep_cols = numeric_cols.extend(string_cols)
-    keep_cols = keep_cols.append(target_col)
+
+    keep_cols = []
+    [keep_cols.append(col) for col in numeric_cols]
+    [keep_cols.append(col) for col in string_cols]
+    keep_cols.append(target_col)
 
     missing_cols = [col for col in keep_cols if col not in df.columns]
     if missing_cols:
@@ -105,7 +108,7 @@ def build_filtered_dataset(
         model_df[col] = model_df[col].replace({"": pd.NA, "nan": pd.NA, "None": pd.NA})
 
     # Convert numerics
-    for col in numeric_cols + ["TotalFaredTotal"]:
+    for col in (numeric_cols + ["TotalFaredTotal"]):
         model_df[col] = pd.to_numeric(model_df[col], errors="coerce")
 
     # Basic row filtering
