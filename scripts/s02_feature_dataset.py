@@ -41,35 +41,7 @@ KEEP_COLS = [
     "metro_2",
 ]
 
-STRING_COLS = [
-    "city_1",
-    "city_2",
-    "state_1",
-    "state_2",
-    "carrier_low",
-    "metro_1",
-    "metro_2",
-]
 
-NUMERIC_COLS = [
-    "Year",
-    "quarter",
-    "nsmiles",
-    "passengers",
-    "fare_real",
-    "large_ms",
-    "fare_lg_real",
-    "lf_ms",
-    "fare_low_real",
-    "TotalFaredPax_city1",
-    "TotalPerLFMkts_city1",
-    "TotalPerPrem_city1",
-    "TotalFaredPax_city2",
-    "TotalPerLFMkts_city2",
-    "TotalPerPrem_city2",
-    "median_income_1",
-    "median_income_2",
-]
 
 
 def build_filtered_dataset(
@@ -84,11 +56,12 @@ def build_filtered_dataset(
     Returns a model-ready dataframe that still contains the target column.
     """
     df = pd.read_csv(csv_path)
+    
+    df = df.loc[:, ~df.columns.duplicated()]
 
-    keep_cols = []
-    [keep_cols.append(col) for col in numeric_cols]
-    [keep_cols.append(col) for col in string_cols]
-    keep_cols.append(target_col)
+    keep_cols = numeric_cols + string_cols
+    if target_col not in keep_cols:
+        keep_cols.append(target_col)
 
     missing_cols = [col for col in keep_cols if col not in df.columns]
     if missing_cols:
@@ -137,17 +110,17 @@ def build_filtered_dataset(
 
 
 def get_train_test_val_split(
+    string_cols: list,
+    numeric_cols: list,
     csv_path: str | Path = RAW_CSV_PATH,
     test_size: float = TEST_SIZE,
     random_state: int = RANDOM_STATE,
-    string_cols: list = STRING_COLS,
-    numeric_cols: list = NUMERIC_COLS,
     target_col: str = TARGET_COL,
 ):
     """
     Return X_train, X_test, x_val, y_train, y_test, y_val from the filtered dataset.
     """
-    model_df = build_filtered_dataset(string_cols, numeric_cols, target_col, csv_path)
+    model_df = build_filtered_dataset(string_cols=string_cols, numeric_cols=numeric_cols, target_col=target_col, csv_path=csv_path)
 
     X = model_df.drop(columns=[target_col])
     y = model_df[target_col]

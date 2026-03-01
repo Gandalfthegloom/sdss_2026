@@ -6,6 +6,8 @@ import shap
 import matplotlib.pyplot as plt
 import os
 
+import joblib
+
 from sklearn.metrics import (
     mean_squared_error,
     mean_absolute_error,
@@ -14,7 +16,10 @@ from sklearn.metrics import (
     explained_variance_score
 )
 
+
+
 def make_shap_friendly(df, cat_cols):
+    
     df2 = df.copy()
 
     for col in cat_cols:
@@ -35,8 +40,38 @@ def make_shap_friendly(df, cat_cols):
     return df2
 
 if __name__ == "__main__":
+    
+    STRING_COLS = [
+        "city_1",
+        "city_2",
+        "state_1",
+        "state_2",
+        "carrier_low",
+        "metro_1",
+        "metro_2",
+    ]
 
-    X_train, X_test, X_val, y_train, y_test, y_val = get_train_test_val_split()
+    NUMERIC_COLS = [
+        "Year",
+        "quarter",
+        "nsmiles",
+        "passengers",
+        "fare_real",
+        "large_ms",
+        # "fare_lg_real",
+        "lf_ms",
+        # "fare_low_real",
+        "TotalFaredPax_city1",
+        "TotalPerLFMkts_city1",
+        "TotalPerPrem_city1",
+        "TotalFaredPax_city2",
+        "TotalPerLFMkts_city2",
+        "TotalPerPrem_city2",
+        "median_income_1",
+        "median_income_2",
+    ]
+
+    X_train, X_test, X_val, y_train, y_test, y_val = get_train_test_val_split(string_cols=STRING_COLS, numeric_cols=NUMERIC_COLS)
 
     cat_cols = ["city_1", "city_2", "state_1", "state_2", "carrier_low", "metro_1", "metro_2"]
 
@@ -91,3 +126,14 @@ plt.savefig("artifacts/shap/shap_summary.png", dpi=200, bbox_inches="tight")
 plt.close()
 
 print("Saved SHAP summary plot.")
+
+# Save the model
+os.makedirs("artifacts/models", exist_ok=True)
+joblib.dump(model, "artifacts/models/xgboost_fare_model.pkl")
+
+# Save the expected columns and categories so Streamlit knows the exact format
+model_metadata = {
+    "columns": X_train.columns.tolist(),
+    "categories": {col: X_train[col].cat.categories.tolist() for col in cat_cols}
+}
+joblib.dump(model_metadata, "artifacts/models/model_metadata.pkl")
