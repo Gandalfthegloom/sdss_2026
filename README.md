@@ -90,6 +90,10 @@ To deploy the website locally:
 streamlit run app.py
 ```
 
+### Generative AI Disclosure
+
+During the development of this project, we utilized Generative AI tools to assist in several technical areas. Specifically, AI was used to help debug code errors, construct testing frameworks, and formulate our model evaluation scripts. Furthermore, we leveraged AI to help generate the automated, plain-English narrative analysis within our Streamlit app, which translates the various categorical variable combinations and SHAP values into an intuitive story for the end-user.
+
 
 
 
