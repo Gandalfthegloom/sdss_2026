@@ -2,7 +2,7 @@
 <img src="Data/logo/UofT.png" height="128">
 
 
-# Airfare Structure Analysis
+# Fair Fare: Airfare Structure Analysis
 
 
 # Contribution
