@@ -5,6 +5,7 @@ from typing import Tuple
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 
 RAW_CSV_PATH = "Data/Interim/adjusted_airline_tickets.csv"
@@ -42,20 +43,59 @@ KEEP_COLS = [
 ]
 
 
+STRING_COLS = [
+    "city_1",
+    "city_2",
+    "state_1",
+    "state_2",
+    "carrier_low",
+    "metro_1",
+    "metro_2",
+    "large_ms",
+    "TotalPerLFMkts_city1",
+    "TotalPerLFMkts_city2",
+    "TotalPerPrem_city1",
+    "TotalPerPrem_city2"
+]
+
+NUMERIC_COLS = [
+    "Year",
+    "quarter",
+    "nsmiles",
+    "passengers",
+    "lf_ms",
+    "TotalFaredPax_city1",
+    "TotalFaredPax_city2",
+    "median_income_1",
+    "median_income_2"
+]
+
 
 
 def build_filtered_dataset(
         string_cols,
         numeric_cols,
-        target_col,
-        csv_path: str | Path = RAW_CSV_PATH
-) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
+        target_col="fare_real",
+        csv_path=RAW_CSV_PATH
+):
     """
     Load, filter, and clean the airline fare dataset.
 
     Returns a model-ready dataframe that still contains the target column.
     """
     df = pd.read_csv(csv_path)
+    
+    # Binning for interpretability.
+    if 'large_ms' in df.columns:
+        df['large_ms'] = pd.cut(df['large_ms'], bins=[-np.inf, 0.40, 0.70, np.inf], labels=['Highly_Competitive', 'Moderately_Concentrated', 'Monopoly_Route']).astype(str)
+        
+    for col in ['TotalPerLFMkts_city1', 'TotalPerLFMkts_city2']:
+        if col in df.columns:
+            df[col] = pd.cut(df[col], bins=[-np.inf, 0.20, 0.60, np.inf], labels=['LCC_Deficient', 'Healthy_Competition', 'LCC_Monopoly']).astype(str)
+            
+    for col in ['TotalPerPrem_city1', 'TotalPerPrem_city2']:
+        if col in df.columns:
+            df[col] = pd.cut(df[col], bins=[-np.inf, 0.0, 0.10, np.inf], labels=['Discount_Hub', 'Neutral/Slight_Premium', 'High_Premium_Hub']).astype(str)
 
     df = df.loc[:, ~df.columns.duplicated()]
 
@@ -161,6 +201,6 @@ def get_train_test_val_split(
 
 
 if __name__ == "__main__":
-    filtered_df = build_filtered_dataset(RAW_CSV_PATH)
+    filtered_df = build_filtered_dataset(csv_path=RAW_CSV_PATH, string_cols=STRING_COLS, numeric_cols=NUMERIC_COLS)
     filtered_df.to_csv(OUTPUT_CSV_PATH, index=False)
     print(f"Saved filtered dataset to {OUTPUT_CSV_PATH} with shape {filtered_df.shape}")

@@ -15,6 +15,33 @@ from sklearn.metrics import (
     explained_variance_score
 )
 
+STRING_COLS = [
+    # "city_1",
+    # "city_2",
+    # "state_1",
+    # "state_2",
+    # "carrier_low",
+    # "metro_1",
+    # "metro_2",
+    "large_ms",
+    "TotalPerLFMkts_city1",
+    "TotalPerLFMkts_city2",
+    "TotalPerPrem_city1",
+    "TotalPerPrem_city2"
+]
+
+NUMERIC_COLS = [
+    "Year",
+    "quarter",
+    "nsmiles",
+    "passengers",
+    "lf_ms",
+    "TotalFaredPax_city1",
+    "TotalFaredPax_city2",
+    "median_income_1",
+    "median_income_2"
+]
+
 def make_shap_friendly(df, cat_cols):
     df2 = df.copy()
 
@@ -37,33 +64,7 @@ def make_shap_friendly(df, cat_cols):
 
 if __name__ == "__main__":
     
-    STRING_COLS = [
-        # "city_1",
-        # "city_2",
-        # "state_1",
-        # "state_2",
-        # "carrier_low",
-        # "metro_1",
-        # "metro_2",
-    ]
 
-    NUMERIC_COLS = [
-        "Year",
-        "quarter",
-        "nsmiles",
-        "passengers",
-        "fare_real", 
-        "large_ms",
-        "lf_ms",
-        "TotalFaredPax_city1",
-        "TotalPerLFMkts_city1",
-        "TotalPerPrem_city1",
-        "TotalFaredPax_city2",
-        "TotalPerLFMkts_city2",
-        "TotalPerPrem_city2",
-        "median_income_1",
-        "median_income_2",
-    ]
 
     X_train, X_test, X_val, y_train, y_test, y_val = get_train_test_val_split(string_cols=STRING_COLS, numeric_cols=NUMERIC_COLS)
 
@@ -72,7 +73,12 @@ if __name__ == "__main__":
         # "city_1", "city_2", 
         # "state_1", "state_2", 
         # "carrier_low", 
-        # "metro_1", "metro_2"
+        # "metro_1", "metro_2",
+        "large_ms",
+        "TotalPerLFMkts_city1",
+        "TotalPerLFMkts_city2",
+        "TotalPerPrem_city1",
+        "TotalPerPrem_city2"
         ]
 
     for col in cat_cols:
@@ -123,7 +129,7 @@ if __name__ == "__main__":
     # Sample rows for SHAP
     X_shap_raw = X_test.sample(min(300, len(X_test)), random_state=42).copy()
 
-    # LightGBM handles categories natively, so we pass X_shap_raw directly!
+    # LightGBM handles categories natively, so we pass X_shap_raw directly
     explainer = shap.TreeExplainer(model)
     shap_values = explainer.shap_values(X_shap_raw)
 

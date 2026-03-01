@@ -21,9 +21,14 @@ STRING_COLS = [
     # "city_2",
     # "state_1",
     # "state_2",
-    "carrier_low",
+    # "carrier_low",
     # "metro_1",
     # "metro_2",
+    "large_ms",
+    "TotalPerLFMkts_city1",
+    "TotalPerLFMkts_city2",
+    "TotalPerPrem_city1",
+    "TotalPerPrem_city2"
 ]
 
 NUMERIC_COLS = [
@@ -31,19 +36,11 @@ NUMERIC_COLS = [
     "quarter",
     "nsmiles",
     "passengers",
-    "fare_real", # We make sure the thing we want to predict is actually in the thing for now. This will later be separated into the y data during split
-    "large_ms",
-    # "fare_lg_real",
     "lf_ms",
-    # "fare_low_real",
     "TotalFaredPax_city1",
-    "TotalPerLFMkts_city1",
-    "TotalPerPrem_city1",
     "TotalFaredPax_city2",
-    "TotalPerLFMkts_city2",
-    "TotalPerPrem_city2",
     "median_income_1",
-    "median_income_2",
+    "median_income_2"
 ]
 
 def evaluate_model(model_name, model_func, X_train, X_valid, X_test, y_train, y_valid, y_test):
