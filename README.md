@@ -75,6 +75,7 @@ All images produced by the scripts are stored in `Data/docs/image`
 - Data exploratory done with `s01_EDA.ipynb`
 - All data preprocessing from Raw into Processed are stored inside `scripts/`. Data preprocess will store the new data 
 in `Data\Interim\adjusted_airline_tickets.csv`
+- Recommended order of running files: s00, s02 (s01 is not required to actually run the site), main, app
 
 
 ### Model Building
