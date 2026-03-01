@@ -1,6 +1,7 @@
 import pandas as pd
 from pathlib import Path
 from getMedianIncome import getMedianIncome
+import requests
 
 
 def joinMedianIncome(origin, state_column_origin):
@@ -45,3 +46,21 @@ def extractCityStateMetropolitan(df):
     df["state_2"] = df["Temp_State"].apply(lambda x: x[1].split(" ")[1])
 
     return df.drop(columns=["city1", "city2"])
+
+
+def getCityLookUp(df):
+    df["city_state_1"] = df.apply(lambda row: tuple([row["city_1_clean"], row['state_1']]), axis=1)
+    unique_pair = df["city_state_1"].unique()
+
+    city_lookup = {}
+
+    for i, (city, state) in enumerate(unique_pair):
+        print(i)
+        url = f"https://api.api-ninjas.com/v1/geocoding?city={city}&country=USA&state={state}"
+        headers = {"X-Api-Key": "qqF9T8YWNWYjP4mY8iILXV0fe43sahD2rZMDl6iv"}
+        response = requests.get(url, headers=headers, timeout=30)
+        data = response.json()[0]
+
+        city_lookup[city] = (data["latitude"], data["longitude"])
+
+    return city_lookup
