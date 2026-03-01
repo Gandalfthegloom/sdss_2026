@@ -126,7 +126,7 @@ def build_filtered_dataset(csv_path: str | Path = RAW_CSV_PATH) -> pd.DataFrame:
     return model_df.reset_index(drop=True)
 
 
-def get_train_test_split(
+def get_train_test_val_split(
     csv_path: str | Path = RAW_CSV_PATH,
     test_size: float = TEST_SIZE,
     random_state: int = RANDOM_STATE,
@@ -136,24 +136,24 @@ def get_train_test_split(
     """
     model_df = build_filtered_dataset(csv_path)
 
-    x = model_df.drop(columns=[TARGET_COL])
+    X = model_df.drop(columns=[TARGET_COL])
     y = model_df[TARGET_COL]
 
-    x_train, x_test, y_train, y_test = train_test_split(
-        x,
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X,
         y,
         test_size=test_size,
         random_state=random_state,
     )
-    
-    x_val, x_train, y_val, y_train = train_test_split(
-        x_train,
-        y_train,
-        0.5,
+
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp,
+        y_temp,
+        test_size=0.5,
         random_state=random_state,
     )
 
-    return x_train, x_test, x_val, y_train, y_test, y_val
+    return X_train, X_test, X_val, y_train, y_test, y_val
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from sklearn.metrics import roc_auc_score, mean_squared_error
 
 def getXGBoost(X_train, X_valid, y_train, y_valid):
     model = XGBRegressor(
-        n_estimators=5000,          # large + early stopping
+        n_estimators=20000,          # large + early stopping
         learning_rate=0.03,
         max_depth=4,
         subsample=0.8,
@@ -17,7 +17,8 @@ def getXGBoost(X_train, X_valid, y_train, y_valid):
         tree_method="hist",
         random_state=42,
         n_jobs=-1,
-        early_stopping_rounds=50
+        early_stopping_rounds=50,
+        enable_categorical=True,
     )
 
     model.fit(
