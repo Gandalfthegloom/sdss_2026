@@ -60,7 +60,7 @@ Branches are organized as follow:
 1. `<feature>`: branched off of `dev`; a feature branch. Features must be tested thoroughly before being merged into dev.
 
 ## Taking on Tickets 🎫
-Check out the issues tab to see all open tickets.
+Check out the issues tab to see all the open tickets.
 
 ## Running The Project
 To ensure Path consistency, it's recommended to run all the script using terminal from root
